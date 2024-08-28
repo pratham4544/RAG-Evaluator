@@ -82,8 +82,8 @@ class ResponseLLM:
         ragas_dataset = {
             'question': questions,
             'ground_truth': ground_truths,
-            'answer': model_answer,
-            'contexts': model_contexts
+            'model_answer': model_answer,
+            'model_context': model_contexts
         }
 
         dataset = Dataset.from_dict(ragas_dataset)
@@ -109,14 +109,14 @@ class ResponseLLM:
     def bert_eval(self, questions, model_answer, ground_truths):
         scorer = BERTScorer(model_type='bert-base-uncased')
         P, R, F1 = scorer.score(model_answer, ground_truths)
-        bert_score = pd.DataFrame({'questions': questions, "Precision": P, 'Recall': R, 'F1 Score': F1})
+        bert_score = pd.DataFrame({'questions': questions, 'model_answer':model_answer, "Precision": P, 'Recall': R, 'F1 Score': F1})
         bert_score.to_csv('BERT_Scores.csv')
 
         return bert_score
 
     def phoenix_eval(self, questions, model_answer, model_contexts, key):
         model = OpenAIModel(model="gpt-3.5-turbo", temperature=0.0, api_key=key)
-        df = pd.DataFrame({'input': questions, 'output': model_answer, 'reference': model_contexts})
+        df = pd.DataFrame({'input': questions, 'model_answer': model_answer, 'reference': model_contexts})
 
         rails = list(HALLUCINATION_PROMPT_RAILS_MAP.values())
 
@@ -141,8 +141,8 @@ class ResponseLLM:
 
         vectra_score = pd.DataFrame({
             "questions": questions,
-            'answer': model_answer,
-            'context': model_contexts,
+            'model_answer': model_answer,
+            'model_context': model_contexts,
             'ground_truths': ground_truths,
             "vectra": final,
             'score': np.round(score, 2)

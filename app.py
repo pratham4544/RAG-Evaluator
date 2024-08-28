@@ -64,11 +64,11 @@ def main():
                     ragas_result = response.ragas_eval(questions_list, ground_truths_list, model_answer, model_contexts)
                     st.dataframe(ragas_result.head())
 
-                    if st.button('Phoenix Evaluations Need OPENAI Key'):
-                        key = st.text_input('Enter OPENAI API KEY')
-                        st.write('Phoenix Evaluation Starts..')
-                        phoenix_result = response.phoenix_eval(questions_list, model_answer, model_contexts, key=key)
-                        st.dataframe(phoenix_result.head())
+                    st.info('Phoenix Evaluations Need OPENAI Key')
+                    key = st.text_input('Enter OPENAI API KEY')
+                    st.write('Phoenix Evaluation Starts..')
+                    phoenix_result = response.phoenix_eval(questions_list, model_answer, model_contexts, key=key)
+                    st.dataframe(phoenix_result.head())
 
 
             
