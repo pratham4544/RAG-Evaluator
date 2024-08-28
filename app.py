@@ -56,18 +56,19 @@ def main():
                     bert_score = response.bert_eval(questions_list, model_answer, ground_truths_list)
                     st.dataframe(bert_score.head())
 
-                    st.write('Phoenix Evaluation Starts..')
-                    phoenix_result = response.phoenix_eval(questions_list, model_answer, model_contexts)
-                    st.dataframe(phoenix_result.head())
-
                     st.write('Vectra Evaluation Starts..')
                     vectra_result = response.vectra_eval(questions_list, model_contexts, model_answer, ground_truths_list)
                     st.dataframe(vectra_result.head())
 
-
                     st.write('RAGAS Evaluation Starts..')
                     ragas_result = response.ragas_eval(questions_list, ground_truths_list, model_answer, model_contexts)
                     st.dataframe(ragas_result.head())
+
+                    if st.button('Phoenix Evaluations Need OPENAI Key'):
+                        key = st.text_input('Enter OPENAI API KEY')
+                        st.write('Phoenix Evaluation Starts..')
+                        phoenix_result = response.phoenix_eval(questions_list, model_answer, model_contexts, key=key)
+                        st.dataframe(phoenix_result.head())
 
 
             

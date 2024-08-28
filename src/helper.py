@@ -114,7 +114,8 @@ class ResponseLLM:
 
         return bert_score
 
-    def phoenix_eval(self, questions, model_answer, model_contexts):
+    def phoenix_eval(self, questions, model_answer, model_contexts, key):
+        model = OpenAIModel(model="gpt-3.5-turbo", temperature=0.0, api_key=key)
         df = pd.DataFrame({'input': questions, 'output': model_answer, 'reference': model_contexts})
 
         rails = list(HALLUCINATION_PROMPT_RAILS_MAP.values())
@@ -122,7 +123,7 @@ class ResponseLLM:
         hallucination_classifications = llm_classify(
             dataframe=df,
             template=HALLUCINATION_PROMPT_TEMPLATE,
-            model=self.openai_model,
+            model=model,
             rails=rails,
             provide_explanation=True,
         )
