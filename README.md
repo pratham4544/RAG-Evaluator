@@ -1,6 +1,6 @@
 # RAG Evaluations App
 
-[Girl Computer Research](assets/banner.jpeg)
+![Girl Computer Research](assets/banner.jpeg)
 
 ## Overview
 
