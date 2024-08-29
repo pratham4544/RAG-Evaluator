@@ -4,7 +4,7 @@
 
 ## Overview
 
-This Streamlit app evaluates the performance of a language model using various metrics such as BERT, Vectra, RAGAS, and Phoenix. It takes a CSV file containing questions and ground truths, and a reference PDF file as input. (APP Link)['https://rag-evaluations.streamlit.app/']
+This Streamlit app evaluates the performance of a language model using various metrics such as BERT, Vectra, RAGAS, and Phoenix. It takes a CSV file containing questions and ground truths, and a reference PDF file as input. [APP Link]('https://rag-evaluator.streamlit.app/)
 
 ## Usage
 
