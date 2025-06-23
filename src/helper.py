@@ -33,10 +33,10 @@ def check(pairs):
 
 class ResponseLLM:
     def __init__(self, model=None, llm=None, embeddings=None, critic_model=None, openai_model=None):
-        self.model = model or ChatGroq(temperature=0, model="llama3-70b-8192")
-        self.llm = llm or ChatGoogleGenerativeAI(model="gemini-pro", temperature=0)
+        self.model = model or ChatGroq(temperature=0, model="llama3-70b-8192", api_key=os.environ['GROQ_API_KEY'])
+        self.llm = llm or ChatGoogleGenerativeAI(model="gemini-2.0-flash", temperature=0)
         self.embeddings = embeddings or GoogleGenerativeAIEmbeddings(model="models/embedding-001")
-        self.critic_model = critic_model or ChatGroq(temperature=0, model_name='llama-3.1-70b-versatile')
+        self.critic_model = critic_model or ChatGroq(temperature=0, model_name='gemma2-9b-it')
         self.openai_model = openai_model or OpenAIModel(model="gpt-3.5-turbo", temperature=0.0)
 
     def llm_response(self, pdf_path):
@@ -82,16 +82,29 @@ class ResponseLLM:
         ragas_dataset = {
             'question': questions,
             'ground_truth': ground_truths,
-            'model_answer': model_answer,
-            'model_context': model_contexts
+            'answer': model_answer,
+            'contexts': model_contexts
         }
+        import ast
 
+# If contexts are stored as string representations of lists, use ast.literal_eval
+
+        def ensure_list(x):
+            if isinstance(x, list):
+                return x
+            try:
+                return ast.literal_eval(x)
+            except Exception:
+                return [x]
+        
         dataset = Dataset.from_dict(ragas_dataset)
+        dataset = dataset.map(lambda row: {"contexts": ensure_list(row["contexts"])})
 
         faithfullness = FaithulnesswithHHEM()
 
         results = evaluate(dataset,
-                           metrics=[faithfullness,
+                           metrics=[
+                                    faithfullness,
                                     faithfulness,
                                     answer_relevancy,
                                     context_utilization,

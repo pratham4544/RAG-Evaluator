@@ -1,6 +1,8 @@
 import streamlit as st
 import pandas as pd
 from src.helper import ResponseLLM
+import os
+import io
 
 def create_download_button(dataframe, filename):
     csv = dataframe.to_csv(index=False)
@@ -32,8 +34,43 @@ def main():
     st.image('assets/format.jpeg')
     uploaded_file = st.file_uploader("Upload your CSV file", type=["csv"])
     pdf_file = st.file_uploader("Upload your reference PDF file", type=['pdf'])
-    
-    if st.button('Submit'):
+
+    # Demo data button
+    use_demo = st.button("Use Demo Data")
+    if use_demo:
+        demo_csv_path = "data/transformer_qa.csv"
+        demo_pdf_path = "data/attention.pdf"
+        if os.path.exists(demo_csv_path) and os.path.exists(demo_pdf_path):
+            with open(demo_csv_path, "rb") as f:
+                csv_bytes = f.read()
+            uploaded_file = io.BytesIO(csv_bytes)
+            uploaded_file.name = "transformer_qa.csv"
+            # Only preview, don't consume for later use
+            process_uploaded_file(uploaded_file)
+            uploaded_file.seek(0)  # Reset pointer for later use
+
+            with open(demo_pdf_path, "rb") as f:
+                pdf_bytes = f.read()
+            pdf_file = io.BytesIO(pdf_bytes)
+            pdf_file.name = "attention.pdf"
+            pdf_file.seek(0)  # Reset pointer for later use
+
+            st.session_state['use_demo'] = True
+            st.session_state['uploaded_file'] = uploaded_file
+            st.session_state['pdf_file'] = pdf_file
+        else:
+            st.error("Demo files not found in data/ directory.")
+
+    # Use session state for demo data
+    if st.session_state.get('use_demo', False):
+        uploaded_file = st.session_state.get('uploaded_file', uploaded_file)
+        pdf_file = st.session_state.get('pdf_file', pdf_file)
+        if uploaded_file is not None:
+            uploaded_file.seek(0)
+        if pdf_file is not None:
+            pdf_file.seek(0)
+
+    if st.button('Submit') or st.session_state.get('use_demo', False):
         if uploaded_file is not None:
             if pdf_file is not None:
                 questions_list, ground_truths_list = process_uploaded_file(uploaded_file)
@@ -60,15 +97,16 @@ def main():
                     vectra_result = response.vectra_eval(questions_list, model_contexts, model_answer, ground_truths_list)
                     st.dataframe(vectra_result.head())
 
-                    st.write('RAGAS Evaluation Starts..')
+                    st.write('RAGAS Evaluation Starts..\n It take time')
                     ragas_result = response.ragas_eval(questions_list, ground_truths_list, model_answer, model_contexts)
                     st.dataframe(ragas_result.head())
 
                     st.info('Phoenix Evaluations Need OPENAI Key')
-                    key = st.text_input('Enter OPENAI API KEY')
-                    st.write('Phoenix Evaluation Starts..')
-                    phoenix_result = response.phoenix_eval(questions_list, model_answer, model_contexts, key=key)
-                    st.dataframe(phoenix_result.head())
+                    key = os.environ['OPENAI_API_KEY']
+                    if key != None:
+                        st.write('Phoenix Evaluation Starts..')
+                        phoenix_result = response.phoenix_eval(questions_list, model_answer, model_contexts, key=key)
+                        st.dataframe(phoenix_result.head())
 
 
             

@@ -1,0 +1,2 @@
+questions,ground_truths,model_context
+What does the Transformer use instead of recurrence or convolution?,"The Transformer replaces recurrence and convolution with attention mechanisms, specifically multi-head self-attention.","“We propose a new simple network architecture, the Transformer, based solely on attention mechanisms, dispensing with recurrence and convolutions entirely.”"
